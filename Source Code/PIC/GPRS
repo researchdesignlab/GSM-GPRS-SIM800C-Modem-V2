@@ -1,0 +1,140 @@
+//******************************************************************************************* 
+//                                     LCD INITIALIZATIONS
+//*******************************************************************************************
+sbit LCD_RS at RB4_bit;
+sbit LCD_EN at RB5_bit;
+sbit LCD_D4 at RB0_bit;
+sbit LCD_D5 at RB1_bit;
+sbit LCD_D6 at RB2_bit;
+sbit LCD_D7 at RB3_bit;
+
+sbit LCD_RS_Direction at TRISB4_bit;
+sbit LCD_EN_Direction at TRISB5_bit;
+sbit LCD_D4_Direction at TRISB0_bit;
+sbit LCD_D5_Direction at TRISB1_bit;
+sbit LCD_D6_Direction at TRISB2_bit;
+sbit LCD_D7_Direction at TRISB3_bit;
+
+//********************************************************************************************
+//                                      UPLOAD FUNCTION
+//********************************************************************************************
+void upload()
+{
+     UART1_Write_text("AT+CIPSTART=\"TCP\",\"iotpi.in\",\"80\"");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+     
+     UART1_Write_text("AT+CIPSEND");
+     UART1_Write(13);
+     UART1_Write(10);
+
+     delay_ms(5000);
+     UART1_Write_text("GET ");                      // GET Meathod
+     UART1_Write_text("/dummy.php?a=abcd&b=1234");  //Jason Parsing Link
+     UART1_Write_text(" HTTP/1.1");
+     UART1_Write(13);
+     UART1_Write(10);
+     UART1_Write_text("Host: ");
+     UART1_Write_text("iotpi.in");                  // Host Address
+     UART1_Write(13);
+     UART1_Write(10);
+     UART1_Write_text("Connection: close");
+     UART1_Write(13);
+     UART1_Write(10);
+     UART1_Write(13);
+     UART1_Write(10);
+     UART1_Write(0x1A);                             // ASCII for CTRL+Z
+
+     delay_ms(3000);
+     
+     UART1_Write_text("AT+CIPCLOSE");                // Closing the connection
+     UART1_Write(13);
+     UART1_Write(10);
+
+     
+     delay_ms(2000);
+
+
+
+
+}
+
+//*********************************************************************************************************
+//                                         MAIN FUNCTION
+//*********************************************************************************************************
+
+void main() {
+     UART1_init(9600);
+     delay_ms(1000);
+     Lcd_Init();
+
+     Lcd_Cmd(_LCD_CLEAR);               // Clear display
+     Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+     Lcd_Out(1,1,"Start");              // Write text in first row
+     delay_ms(1000);
+
+     UART1_Write_text("AT");
+     UART1_Write(13);
+     UART1_Write(10);
+
+     Delay_ms(2000);
+     UART1_Write_text("AT+CMGF=1");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(1000);
+
+
+     UART1_Write_text("AT+CMGD=1,4");     // Delete all the messages
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+     
+     UART1_Write_text("AT+CFUN=1");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+
+     UART1_Write_text("AT+CSTT=\"imis/internet\",\"\",\"\"");   // IDEA APN
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+
+     UART1_Write_text("AT+CIICR");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+
+     UART1_Write_text("AT+CIFSR");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(6000);
+     
+     UART1_Write_text("AT+CMGF=1");
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(1000);
+     
+
+
+     Lcd_Cmd(_LCD_CLEAR);               // Clear display
+     Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+     Lcd_Out(1,1,"GSM INITIALIZED");    // Write text in first row
+     delay_ms(1000);
+     while(1)
+     {
+      Lcd_Cmd(_LCD_CLEAR);               // Clear display
+      Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+      Lcd_Out(1,1,"UPLOADING..");        // Write text in first row
+      delay_ms(1000);
+      upload();
+      delay_ms(20000);
+      Lcd_Cmd(_LCD_CLEAR);               // Clear display
+      Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+      Lcd_Out(1,1,"UPLOADED");           // Write text in first  row
+      delay_ms(1000);
+
+     }
+
+
+}
