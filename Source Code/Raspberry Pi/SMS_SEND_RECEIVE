@@ -1,0 +1,105 @@
+#********************************************************************************************************
+#                                    PRE-PROCESSOR DIRECTIVES
+#********************************************************************************************************
+import picamera
+import os
+import RPi.GPIO as GPIO
+from time import sleep
+import serial
+ser = serial.Serial('/dev/ttyUSB0', 9600)           #Serial port Initializations
+
+GPIO.setmode(GPIO.BCM)                              # Defining as BroadCom Pins
+
+
+s1= "9665555558"                                    # Phon numbers
+s2= "8999999996"
+s3= "8999999991"
+
+#*********************************************************************************************************
+#                                     GSM INITIALIZATION
+#*********************************************************************************************************
+def gsm_init():
+	ser.write('AT'+'\r\n')
+	sleep (1)
+	x = ''
+	while ser.inWaiting()>0:
+        	x += ser.read(1)
+	print x
+
+	ser.write('AT+CMGF=1'+'\r\n')
+	sleep (1)
+	x = ''
+	while ser.inWaiting()>0:
+        	x += ser.read(1)
+	print x
+
+	ser.write('AT+CMGD=1,4'+'\r\n')               #Deleting all the messages
+	sleep (1)
+	x = ''
+        while ser.inWaiting()>0:
+        	x += ser.read(1)
+        print x
+#*********************************************************************************************************
+#                                     SMS FUNCTION
+#*********************************************************************************************************
+
+def send_mes(num1):
+	ser.write('AT+CMGS=\"'+num1+'\"\r\n')        #Sending an SMS
+	sleep (1)
+	x = ''
+        while ser.inWaiting()>0:
+                x += ser.read(1)
+        print x
+
+	ser.write('Greetings from RDL Technologies'+'\r\n')     #Message
+	ser.write("\x1A")
+	sleep (5)
+	x = ''
+        while ser.inWaiting()>0:
+                x += ser.read(1)
+        print x
+        x = ''
+	cn1 =  0
+	while cn1<1:
+
+	        while ser.inWaiting()>0:
+			x=ser.read(1)
+			if x=='C':
+				while ser.inWaiting()>0:
+                        		x=ser.read(1)
+					if x =='M':
+						while ser.inWaiting()>0:
+                                        		x=ser.read(1)
+                                        		if x =='T':
+								while ser.inWaiting()>0:
+                        				                x=ser.read(1)
+			                                	        if x =='I':
+										x=''
+										while ser.inWaiting()>0:
+               										x += ser.read(1)
+        									print x
+										print "message recieved"
+
+									        sleep(8)
+        									ser.write('AT+CMGR=1'+'\r\n') #Read the message
+        									sleep(1)
+        									x = ''
+        									while ser.inWaiting()>0:
+                									x += ser.read(1)
+        									print x
+										cn1 = 1
+#*********************************************************************************************************
+#                                     MAIN FUNCTION
+#*********************************************************************************************************
+
+try:
+	gsm_init()
+	gpslist=''
+
+	while 1:
+		send_mes(s1)     #call SMS function
+		sleep(8)
+		print "message sent"
+finally:
+	GPIO.cleanup()
+
