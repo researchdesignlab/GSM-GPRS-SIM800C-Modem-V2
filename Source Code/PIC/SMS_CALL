@@ -1,0 +1,199 @@
+//**************************************************************************************************
+//                                      LCD pin initializations
+//**************************************************************************************************
+sbit LCD_RS at RB4_bit;                       
+sbit LCD_EN at RB5_bit;
+sbit LCD_D4 at RB0_bit;
+sbit LCD_D5 at RB1_bit;
+sbit LCD_D6 at RB2_bit;
+sbit LCD_D7 at RB3_bit;
+
+sbit LCD_RS_Direction at TRISB4_bit;
+sbit LCD_EN_Direction at TRISB5_bit;
+sbit LCD_D4_Direction at TRISB0_bit;
+sbit LCD_D5_Direction at TRISB1_bit;
+sbit LCD_D6_Direction at TRISB2_bit;
+sbit LCD_D7_Direction at TRISB3_bit;
+//****************************************************************************************************
+//
+//****************************************************************************************************
+
+int k = 0;
+char var, array1[100];
+int i =0;
+char cn1 = 0;
+
+//****************************************************************************************************
+//                                     SMS FUNCTION
+//****************************************************************************************************
+
+
+void sendSMS()
+{
+        Lcd_Cmd(_LCD_CLEAR);               // Clear display
+        Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+        Lcd_Out(1,1,"SENDING SMS");        // Write text in first row
+        delay_ms(1000);
+
+        Delay_ms(1000);
+        UART1_Write_text("AT+CMGS=\"7999999993\"");        // Sending an SMS to the mentioned phone number
+        UART1_Write(13);
+        UART1_Write(10);
+        delay_ms(1000);
+        UART1_Write_text("Greetings from RDL Technologies!!");  // Messgae that is to be sent
+        UART1_Write(0x1A);                                      // ASCII for CTRL+Z
+        UART1_Write(0x1A);
+        delay_ms(1000);
+        Delay_ms(500);
+
+        Lcd_Cmd(_LCD_CLEAR);               // Clear display
+        Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+        Lcd_Out(1,1,"SENT");               // Display SENT
+        delay_ms(1000);
+        Lcd_Cmd(_LCD_CLEAR);               // Clear display
+        Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+        Lcd_Out(1,1,"WAITNG FOR REPLY");   // Display WAITNG FOR REPLY
+        delay_ms(1000);
+
+        cn1 = 0;
+        while(cn1<1)
+        {
+        while(!UART1_Data_Ready());         // Waiting for reply
+        var=UART1_Read();
+
+        if(var=='+')
+        {
+           while(!UART1_Data_Ready());
+           var=UART1_Read();
+
+           if(var=='C')
+           {
+              while(!UART1_Data_Ready());
+              var=UART1_Read();
+
+              if(var=='M')
+              {
+                while(!UART1_Data_Ready());
+                var=UART1_Read();
+
+                if(var=='T')
+                  {
+                   while(!UART1_Data_Ready());
+                   var=UART1_Read();
+
+                    if(var=='I')
+                    {
+                      Delay_ms(2000);
+                      Lcd_Cmd(_LCD_CLEAR);
+                      Lcd_Out(1,1,"RECIEVED");         // Display  RECIEVED
+                      Delay_ms(2000);
+                      // Clear display
+                      UART1_Write_Text("AT+CMGR=1");    // Read the Recieved SMS
+                      UART1_Write(13);
+                      UART1_Write(10);
+                        for (k = 0; k<8;)
+                        {
+                          while(!UART1_Data_Ready());
+                          var = UART1_read();
+                          if(var== '"')
+                          {
+                           k++;
+                          }
+                        }
+
+                        for (k = 0; k<2;k++)
+                        {
+                        while(!UART1_Data_Ready());
+                        var = UART1_read();
+                        }
+
+                        for (k = 0; k<6; k++)
+                        {
+                         while(!UART1_Data_Ready());
+                         var = UART1_read();
+                         array1[k] = var;
+                        }
+                        Lcd_Cmd(_LCD_CLEAR);               // Clear display
+                        Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+                        Lcd_Out(1,1,array1);               // Display the SMS upto six characters
+                        delay_ms(3000);
+                        UART1_Write_text("AT+CMGD=1,4");   // Delete all the messages
+                        UART1_Write(13);
+                        UART1_Write(10);
+                        delay_ms(1000);
+                        Lcd_Cmd(_LCD_CLEAR);
+                        Lcd_Out(1,1,"MESSAGES DELETED");    // Display MESSAGES DELETED
+                        Delay_ms(2000);
+                        cn1 = 1;
+                     }
+                   }
+                }
+              }
+            }
+      }
+
+
+}
+//****************************************************************************************************
+//                                       CALL FUNCTION
+//****************************************************************************************************
+
+void call()
+{
+      Lcd_Cmd(_LCD_CLEAR);               // Clear display
+      Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+      Lcd_Out(1,1,"CALLING");            // display CALLING
+      delay_ms(1000);
+
+      UART1_Write_Text("ATD7999999993;");    // Calling the mentioned phone number
+      UART1_Write(13);
+      UART1_Write(10);
+      delay_ms(40000);                       //Waiting for ten seconds
+      UART1_Write_Text("ATH");               // Hang up
+      UART1_Write(13);
+      UART1_Write(10);
+      delay_ms(10000);
+}
+
+//****************************************************************************************************
+//                                      MAIN FUNCTION
+//****************************************************************************************************
+
+
+void main() {
+     UART1_init(9600);
+     Lcd_Init();
+
+     Lcd_Cmd(_LCD_CLEAR);               // Clear display
+     Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+     Lcd_Out(1,1,"Start");              // Display Start
+     delay_ms(1000);
+
+     UART1_Write_text("AT");             //Start sending AT commands(Attention Commands)
+     UART1_Write(13);
+     UART1_Write(10);
+
+     Delay_ms(2000);
+     UART1_Write_text("AT+CMGF=1");      //CMGF (command name in text: Message Format)
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(1000);
+
+
+     UART1_Write_text("AT+CMGD=1,4");    // Deleting all the messages
+     UART1_Write(13);
+     UART1_Write(10);
+     delay_ms(3000);
+
+     Lcd_Cmd(_LCD_CLEAR);               // Clear display
+     Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+     Lcd_Out(1,1,"GSM INITIALIZED");    // Display GSM INITIALIZED
+     delay_ms(1000);
+
+     while(1)
+     {
+      sendSMS();                        //Calling sendSMS function
+      delay_ms(10000);
+      call();                           //Calling Call function
+     }
+}
