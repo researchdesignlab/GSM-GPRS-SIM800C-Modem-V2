@@ -20,23 +20,23 @@ sbit LCD_D7_Direction at TRISB3_bit;
 //********************************************************************************************
 void upload()
 {
-     UART1_Write_text("AT+CIPSTART=\"TCP\",\"iotpi.in\",\"80\"");
-     UART1_Write(13);
-     UART1_Write(10);
+     UART1_Write_text("AT+CIPSTART=\"TCP\",\"www.google.com\",\"80\""); //Start up TCP or UDP connection
+     UART1_Write(13);													//ASCII for carriage return
+     UART1_Write(10);													//ASCII for newline
      delay_ms(3000);
      
-     UART1_Write_text("AT+CIPSEND");
+     UART1_Write_text("AT+CIPSEND");                					//Send data through TCP or UDP connection
      UART1_Write(13);
      UART1_Write(10);
 
      delay_ms(5000);
-     UART1_Write_text("GET ");                      // GET Meathod
-     UART1_Write_text("/dummy.php?a=abcd&b=1234");  //Jason Parsing Link
+     UART1_Write_text("GET ");                      					// GET Meathod
+     UART1_Write_text("/dummy.php?a=abcd&b=1234");  					//Jason Parsing Link
      UART1_Write_text(" HTTP/1.1");
      UART1_Write(13);
      UART1_Write(10);
      UART1_Write_text("Host: ");
-     UART1_Write_text("iotpi.in");                  // Host Address
+     UART1_Write_text("www.google.com");            					// Host Address
      UART1_Write(13);
      UART1_Write(10);
      UART1_Write_text("Connection: close");
@@ -44,15 +44,12 @@ void upload()
      UART1_Write(10);
      UART1_Write(13);
      UART1_Write(10);
-     UART1_Write(0x1A);                             // ASCII for CTRL+Z
-
+     UART1_Write(0x1A);                             					// ASCII for CTRL+Z
      delay_ms(3000);
      
-     UART1_Write_text("AT+CIPCLOSE");                // Closing the connection
+     UART1_Write_text("AT+CIPCLOSE");                					// Closing the connection
      UART1_Write(13);
      UART1_Write(10);
-
-     
      delay_ms(2000);
 
 
@@ -65,21 +62,21 @@ void upload()
 //*********************************************************************************************************
 
 void main() {
-     UART1_init(9600);
-     delay_ms(1000);
-     Lcd_Init();
+     UART1_init(9600);					//Serial Port Initializations with baud rate of 9600
+     delay_ms(1000);					//Delay function for 1000 milliseconds
+     Lcd_Init();						//LCD Initialization     
 
      Lcd_Cmd(_LCD_CLEAR);               // Clear display
      Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
      Lcd_Out(1,1,"Start");              // Write text in first row
      delay_ms(1000);
 
-     UART1_Write_text("AT");
+     UART1_Write_text("AT");			//Test command
      UART1_Write(13);
      UART1_Write(10);
 
      Delay_ms(2000);
-     UART1_Write_text("AT+CMGF=1");
+     UART1_Write_text("AT+CMGF=1");		//Set SMS system into text mode, as opposed to PDU mode.
      UART1_Write(13);
      UART1_Write(10);
      delay_ms(1000);
@@ -90,7 +87,7 @@ void main() {
      UART1_Write(10);
      delay_ms(3000);
      
-     UART1_Write_text("AT+CFUN=1");
+     UART1_Write_text("AT+CFUN=1");       //Used to reset module purposely at minimum/full functionality mode
      UART1_Write(13);
      UART1_Write(10);
      delay_ms(3000);
@@ -100,17 +97,17 @@ void main() {
      UART1_Write(10);
      delay_ms(3000);
 
-     UART1_Write_text("AT+CIICR");
+     UART1_Write_text("AT+CIICR");			//Bring up wireless connection with GPRS or CSD 
      UART1_Write(13);
      UART1_Write(10);
      delay_ms(3000);
 
-     UART1_Write_text("AT+CIFSR");
+     UART1_Write_text("AT+CIFSR");			//Get local IP address
      UART1_Write(13);
      UART1_Write(10);
      delay_ms(6000);
      
-     UART1_Write_text("AT+CMGF=1");
+     UART1_Write_text("AT+CMGF=1");			//Set SMS system into text mode, as opposed to PDU mode.
      UART1_Write(13);
      UART1_Write(10);
      delay_ms(1000);
@@ -127,8 +124,8 @@ void main() {
       Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
       Lcd_Out(1,1,"UPLOADING..");        // Write text in first row
       delay_ms(1000);
-      upload();
-      delay_ms(20000);
+      upload();							 // calling upload function
+      delay_ms(20000);					 // To upload every 20 seconds
       Lcd_Cmd(_LCD_CLEAR);               // Clear display
       Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
       Lcd_Out(1,1,"UPLOADED");           // Write text in first  row
