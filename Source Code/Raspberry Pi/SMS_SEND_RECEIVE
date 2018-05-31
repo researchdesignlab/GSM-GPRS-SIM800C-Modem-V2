@@ -1,68 +1,65 @@
-#********************************************************************************************************
-#                                    PRE-PROCESSOR DIRECTIVES
-#********************************************************************************************************
-import picamera
-import os
-import RPi.GPIO as GPIO
-from time import sleep
-import serial
-ser = serial.Serial('/dev/ttyUSB0', 9600)           #Serial port Initializations
+#*********************************************************************************************************************************************
+#                                    			PRE-PROCESSOR DIRECTIVES
+#*********************************************************************************************************************************************
+from time import sleep										#Importing library for sleep/delay function
+import serial												#Importing serial library
+ser = serial.Serial('/dev/ttyUSB0', 9600)           		#Serial port initializations connected via USB-TTL Converter.
 
-GPIO.setmode(GPIO.BCM)                              # Defining as BroadCom Pins
+GPIO.setmode(GPIO.BCM)                              		# Defining as BroadCom Pins
 
 
-s1= "9665555558"                                    # Phon numbers
+s1= "9665555558"                                    		# Phone numbers
 s2= "8999999996"
 s3= "8999999991"
 
-#*********************************************************************************************************
-#                                     GSM INITIALIZATION
-#*********************************************************************************************************
+#*********************************************************************************************************************************************
+#                                     				GSM INITIALIZATION
+#*********************************************************************************************************************************************
 def gsm_init():
-	ser.write('AT'+'\r\n')
+	ser.write('AT'+'\r\n')									#Test command
 	sleep (1)
 	x = ''
 	while ser.inWaiting()>0:
         	x += ser.read(1)
 	print x
 
-	ser.write('AT+CMGF=1'+'\r\n')
+	ser.write('AT+CMGF=1'+'\r\n')				  			#Set SMS system into text mode, as opposed to PDU mode. 					
 	sleep (1)
 	x = ''
 	while ser.inWaiting()>0:
         	x += ser.read(1)
 	print x
 
-	ser.write('AT+CMGD=1,4'+'\r\n')               #Deleting all the messages
+	ser.write('AT+CMGD=1,4'+'\r\n')               			#Deleting all the messages
 	sleep (1)
 	x = ''
         while ser.inWaiting()>0:
         	x += ser.read(1)
         print x
-#*********************************************************************************************************
-#                                     SMS FUNCTION
-#*********************************************************************************************************
+#********************************************************************************************************************************************
+#                                     					SMS FUNCTION
+#********************************************************************************************************************************************
 
 def send_mes(num1):
-	ser.write('AT+CMGS=\"'+num1+'\"\r\n')        #Sending an SMS
+	ser.write('AT+CMGS=\"'+num1+'\"\r\n')        			#Sending an SMS
 	sleep (1)
 	x = ''
-        while ser.inWaiting()>0:
-                x += ser.read(1)
+        while ser.inWaiting()>0:							#Waits for  the GSM resonse
+                x += ser.read(1)							#Prints the GSM resonse
         print x
 
 	ser.write('Greetings from RDL Technologies'+'\r\n')     #Message
-	ser.write("\x1A")
+	ser.write("\x1A")										#ASCII for CTRL+Z
 	sleep (5)
 	x = ''
-        while ser.inWaiting()>0:
+        while ser.inWaiting()>0:							#Waits for  the GSM resonse
                 x += ser.read(1)
-        print x
+        print x												#Prints the GSM resonse	
         x = ''
-	cn1 =  0
-	while cn1<1:
+	cn1 =  0												#Flag variable being reset to enter into the while loop
+	while cn1<1:											#To wait until a message is recieved
 
-	        while ser.inWaiting()>0:
+	        while ser.inWaiting()>0:						#Waiting to recieve CMTI indicating that new message has been received
 			x=ser.read(1)
 			if x=='C':
 				while ser.inWaiting()>0:
@@ -75,31 +72,26 @@ def send_mes(num1):
                         				                x=ser.read(1)
 			                                	        if x =='I':
 										x=''
-										while ser.inWaiting()>0:
-               										x += ser.read(1)
+										while ser.inWaiting()>0:		
+               										x += ser.read(1)	
         									print x
 										print "message recieved"
 
 									        sleep(8)
-        									ser.write('AT+CMGR=1'+'\r\n') #Read the message
+        									ser.write('AT+CMGR=1'+'\r\n')	#Read the message
         									sleep(1)
         									x = ''
-        									while ser.inWaiting()>0:
+        									while ser.inWaiting()>0:    	#Waits for  the GSM resonse
                 									x += ser.read(1)
-        									print x
-										cn1 = 1
-#*********************************************************************************************************
-#                                     MAIN FUNCTION
-#*********************************************************************************************************
+        									print x							#Prints the GSM resonse	
+										cn1 = 1								#Break out of the while loop
+#*******************************************************************************************************************************************
+#                                     				MAIN FUNCTION
+#*******************************************************************************************************************************************
 
-try:
-	gsm_init()
-	gpslist=''
-
-	while 1:
-		send_mes(s1)     #call SMS function
-		sleep(8)
-		print "message sent"
-finally:
-	GPIO.cleanup()
+gsm_init()												#Initializing GSM by calling the gsm_init function
+while 1:
+	send_mes(s1)     									#call SMS function
+	sleep(8)											#To send message every eight seconds
+	print "Message sent"								#Prints Message sent
 
