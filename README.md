@@ -20,7 +20,7 @@ GSM GPRS SIM800C Modem-RS232 is built with Quad-Band GSM GPRS engine-SIM800C, wo
 
 Arduino GPRS Code: <https://github.com/researchdesignlab/GSM-GPRS-SIM800C-Modem-V2/blob/master/Source%20Code/Arduino/GPRS%20Code>
 
-[Arduino]: https://github.com/researchdesignlab/GSM-GPRS-SIM800C-Modem-V2/blob/master/Source%20Code/Arduino/GPRS%20Code
+[Arduino]: https://github.com
 
 If you have any Quiries, Questions or Concerns, please contact support@researchdesignlab.com
 
